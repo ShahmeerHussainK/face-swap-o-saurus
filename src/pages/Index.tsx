@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 const Index = () => {
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -17,6 +18,9 @@ const Index = () => {
   const handleImageUpload = (file: File) => {
     setUploadedImage(file);
     setResultImage(null);
+    // Create preview URL for the uploaded image
+    const previewUrl = URL.createObjectURL(file);
+    setUploadedImagePreview(previewUrl);
   };
 
   const handleFaceSwap = async () => {
@@ -96,6 +100,16 @@ const Index = () => {
               Upload Your Photo
             </h2>
             <ImageUpload onImageSelect={handleImageUpload} />
+            
+            {uploadedImagePreview && (
+              <div className="mt-4 rounded-lg overflow-hidden border border-gray-200">
+                <img 
+                  src={uploadedImagePreview} 
+                  alt="Uploaded Preview" 
+                  className="w-full h-auto max-h-[300px] object-contain"
+                />
+              </div>
+            )}
           </section>
 
           {isProcessing && (
