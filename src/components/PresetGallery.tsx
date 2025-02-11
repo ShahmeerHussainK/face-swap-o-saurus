@@ -2,10 +2,9 @@
 import { ImageCard } from "./ImageCard";
 
 const PRESET_IMAGES = [
-  "/placeholder.svg",
-  "/placeholder.svg",
-  "/placeholder.svg",
-  "/placeholder.svg",
+  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
+  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+  "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952"
 ];
 
 interface PresetGalleryProps {
@@ -18,7 +17,7 @@ export const PresetGallery = ({
   onImageSelect,
 }: PresetGalleryProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {PRESET_IMAGES.map((image, index) => (
         <ImageCard
           key={index}

@@ -5,14 +5,18 @@ import { PresetGallery } from "@/components/PresetGallery";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Wand2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const Index = () => {
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [resultImage, setResultImage] = useState<string | null>(null);
 
   const handleImageUpload = (file: File) => {
     setUploadedImage(file);
+    setResultImage(null);
   };
 
   const handleFaceSwap = async () => {
@@ -22,11 +26,42 @@ const Index = () => {
     }
 
     setIsProcessing(true);
-    // TODO: Implement face swap logic
-    setTimeout(() => {
-      toast.info("Face swap feature coming soon!");
+    setProgress(0);
+
+    try {
+      // Create form data
+      const formData = new FormData();
+
+      // First, fetch the preset image and convert it to a file
+      const presetResponse = await fetch(selectedPreset);
+      const presetBlob = await presetResponse.blob();
+      const presetFile = new File([presetBlob], "target.jpg", { type: "image/jpeg" });
+
+      formData.append("target_file", presetFile);
+      formData.append("source_file", uploadedImage);
+
+      // Make the API call
+      const response = await fetch("http://127.0.0.1:8000/swap_faces/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Face swap failed");
+      }
+
+      // Convert the response to a blob and create an object URL
+      const resultBlob = await response.blob();
+      const resultUrl = URL.createObjectURL(resultBlob);
+      setResultImage(resultUrl);
+      toast.success("Face swap completed successfully!");
+    } catch (error) {
+      console.error("Face swap error:", error);
+      toast.error("Failed to swap faces. Please try again.");
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+      setProgress(100);
+    }
   };
 
   return (
@@ -62,6 +97,26 @@ const Index = () => {
             </h2>
             <ImageUpload onImageSelect={handleImageUpload} />
           </section>
+
+          {isProcessing && (
+            <div className="space-y-2">
+              <Progress value={progress} className="w-full" />
+              <p className="text-center text-sm text-gray-600">Processing your image...</p>
+            </div>
+          )}
+
+          {resultImage && (
+            <section className="space-y-4 animate-slideUp">
+              <h2 className="text-2xl font-semibold text-primary">Result</h2>
+              <div className="rounded-lg overflow-hidden">
+                <img 
+                  src={resultImage} 
+                  alt="Face Swap Result" 
+                  className="w-full h-auto"
+                />
+              </div>
+            </section>
+          )}
 
           <div className="flex justify-center pt-4 animate-slideUp" style={{ "--delay": "0.6s" } as any}>
             <Button
